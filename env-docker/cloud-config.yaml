@@ -8,7 +8,7 @@ apt:
   sources:
     docker:
       # $RELEASE will be automatically replaced by the OS codename (e.g., jammy, noble)
-      source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ v1.distro_release }} stable"
+      source: "deb https://download.docker.com/linux/ubuntu {{ v1.distro_release }} stable"
       keyid: 0EBFCD88
 
 # Install Docker packages
