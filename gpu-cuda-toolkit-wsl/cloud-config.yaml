@@ -1,4 +1,4 @@
-# cloud-config
+#cloud-config
 # Minimal configuration to install CUDA toolkit on Ubuntu (WSL)
 
 # Add NVIDIA's official repository for CUDA toolkit on WSL
