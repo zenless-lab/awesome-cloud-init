@@ -1,0 +1,14 @@
+#cloud-config
+# Minimal configuration to install CUDA toolkit on Ubuntu (WSL)
+
+# Add NVIDIA's official repository for CUDA toolkit on WSL
+apt:
+  sources:
+    cuda:
+      # NOTE: Update source URL and keyid based on the latest version from NVIDIA's website
+      source: "deb https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/ /"
+      keyid: 3BF863CC
+
+# Install the specific CUDA toolkit package
+packages:
+  - cuda-toolkit-13-1 # NOTE: Adjust version as needed: 12-8, 13-0, etc.
