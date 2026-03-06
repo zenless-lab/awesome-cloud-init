@@ -1,0 +1,16 @@
+#cloud-config
+# Minimal configuration to install Rust using rustup
+
+# Ensure prerequisites are installed
+packages:
+  - curl
+  - ca-certificates
+  - build-essential # Often needed for compiling Rust crates
+
+# Post-installation setup
+runcmd:
+  # Install Rust (unattended with -y flag)
+  - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  # Optional: Ensure cargo is in the PATH for future shells
+  - echo '. $HOME/.cargo/env' >> ~/.bashrc
+  # - echo '. $HOME/.cargo/env' >> ~/.zshrc  # Uncomment if using zsh as default shell

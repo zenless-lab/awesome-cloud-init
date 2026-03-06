@@ -1,0 +1,14 @@
+#cloud-config
+# Minimal configuration to install .NET SDK on Ubuntu
+
+# NOTE: Additional repository is usually ONLY needed for Ubuntu 22.04 and below
+# when installing .NET 8.0 or higher. Ubuntu 24.04+ includes recent .NET SDKs
+# in the default repositories.
+# apt:
+#   sources:
+#     dotnet:
+#       source: "ppa:dotnet/backports"
+
+# Install the .NET SDK
+packages:
+  - dotnet-sdk-8.0 # NOTE: Adjust version as needed: 6.0, 8.0, 9.0, 10.0 (as available)
