@@ -14,7 +14,6 @@ packages:
 
 # Configure the default user and its shell
 user:
-  name: ubuntu
   shell: /bin/zsh
 
 write_files:
