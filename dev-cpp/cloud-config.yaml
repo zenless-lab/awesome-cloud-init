@@ -4,10 +4,13 @@
 
 # Install core packages and development tools
 packages:
-  - apt: build-essential
-    yum: [gcc-c++, make]
-  - apt: pkg-config
-    yum: pkgconf-pkg-config
+  - apt:
+    - build-essential
+    - pkg-config
+  - yum:
+    - gcc-c++
+    - make
+    - pkgconf-pkg-config
   - clang
   - lld
   - lldb
