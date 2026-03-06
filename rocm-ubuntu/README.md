@@ -61,7 +61,7 @@ multipass launch 24.04 --name rocm-ubuntu --cpus 4 --memory 8G --disk 40G --clou
 incus launch images:ubuntu/24.04/cloud rocm-ubuntu --vm --config=user.user-data="$(cat cloud-config.yaml)"
 ```
 
-### LXD (lxc / LDX)
+### LXD (lxc / LXD)
 
 ```bash
 lxc launch images:ubuntu/24.04/cloud rocm-ubuntu --vm --config=user.user-data="$(cat cloud-config.yaml)"
