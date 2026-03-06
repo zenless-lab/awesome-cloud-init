@@ -1,0 +1,17 @@
+#cloud-config
+# [Project Name]
+# Template for new cloud-init configurations.
+
+# Update the package list
+package_update: true
+package_upgrade: true
+
+# Install essential packages
+packages:
+  - curl
+  - git
+
+# Core logic
+runcmd:
+  # Add your installation and configuration steps here
+  - echo "Hello from cloud-init template!"

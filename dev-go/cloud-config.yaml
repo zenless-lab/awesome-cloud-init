@@ -1,0 +1,47 @@
+#cloud-config
+# Minimal configuration to install a modern Golang development environment.
+# Includes Go runtime, git, and common build tools.
+
+# Ensure prerequisites are installed
+packages:
+  - curl
+  - git
+  - ca-certificates
+  - build-essential # Often needed for cgo or compiling certain tools
+
+# Post-installation setup
+runcmd:
+  # Install Go (latest stable)
+  - |
+    GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
+    # Check if latest version is already installed
+    if [[ -d "/usr/local/go" ]] && [[ "$(/usr/local/go/bin/go version 2>/dev/null)" == *"$GO_VERSION"* ]]; then
+      echo "Go $GO_VERSION is already installed."
+    else
+      echo "Installing Go $GO_VERSION..."
+      curl -L -o /tmp/go.tar.gz https://go.dev/dl/${GO_VERSION}.linux-amd64.tar.gz
+      rm -rf /usr/local/go
+      tar -C /usr/local -xzf /tmp/go.tar.gz
+      rm /tmp/go.tar.gz
+    fi
+
+  # Set up environment variables for the primary user
+  - |
+    USER_NAME=$(id -nu 1000)
+    USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+
+    # Create GOPATH directory
+    mkdir -p ${USER_HOME}/go/{bin,src,pkg}
+    chown -R 1000:1000 ${USER_HOME}/go
+
+    # Configure environment in .bashrc if not already present
+    if ! grep -q "GOROOT=/usr/local/go" ${USER_HOME}/.bashrc; then
+      cat << 'EOF' >> ${USER_HOME}/.bashrc
+
+    # Go environment
+    export GOROOT=/usr/local/go
+    export GOPATH=$HOME/go
+    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+    EOF
+      chown 1000:1000 ${USER_HOME}/.bashrc
+    fi

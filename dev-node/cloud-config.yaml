@@ -1,0 +1,48 @@
+#cloud-config
+# Minimal configuration to install a modern Node.js and JavaScript development environment.
+# Includes Node.js, npm, pnpm, yarn, deno, and bun.
+# Targets compatible Linux distributions.
+
+# Install Node.js and basic dependencies
+packages:
+  - curl
+  - git
+  - unzip
+
+# Post-installation steps to install package managers and alternative runtimes
+runcmd:
+  # Enable corepack for yarn and pnpm (modern Node.js approach)
+  - runuser -u $(id -nu 1000) -- bash -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash"
+  - |
+    runuser -u $(id -nu 1000) -- bash -c '
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+      nvm install 22
+      nvm alias default 22
+
+      corepack enable yarn
+      corepack prepare yarn@latest --activate
+
+      corepack enable pnpm
+      corepack prepare pnpm@latest --activate
+
+    '
+
+  # Install Deno
+  - runuser -u $(id -nu 1000) -- bash -c "curl -fsSL https://deno.land/install.sh | sh"
+
+  # Install Bun
+  - runuser -u $(id -nu 1000) -- bash -c "curl -fsSL https://bun.com/install | bash"
+
+  # Ensure binaries are in the PATH for the primary user
+  - |
+    USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+    cat << 'EOF' >> ${USER_HOME}/.bashrc
+
+    # JS Runtimes (Deno & Bun)
+    export DENO_INSTALL="$HOME/.deno"
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$DENO_INSTALL/bin:$BUN_INSTALL/bin:$PATH"
+    EOF
+    chown 1000:1000 ${USER_HOME}/.bashrc

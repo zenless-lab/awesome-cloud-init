@@ -1,0 +1,24 @@
+#cloud-config
+# Minimal configuration to install modern Python development tools (uv, miniforge, micromamba).
+# Targets compatible Linux distributions. Uses UID 1000 for the primary user.
+
+# Install common dependencies
+packages:
+  - curl
+  - git
+
+# Post-installation steps to install Python package and environment managers
+# Using runuser with UID 1000 to avoid hardcoded username
+runcmd:
+  # Install uv (modern Python package manager)
+  - runuser -u $(id -nu 1000) -- sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
+  # Install Miniforge (minimal conda installer)
+  - |
+    USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+    TEMP_SH="/tmp/Miniforge3-$(uname)-$(uname -m).sh"
+    curl -L "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -o "${TEMP_SH}"
+    runuser -u $(id -nu 1000) -- bash "${TEMP_SH}" -b -p "${USER_HOME}/miniforge3"
+    runuser -u $(id -nu 1000) -- "${USER_HOME}/miniforge3/bin/conda" init
+    rm "${TEMP_SH}"
+  # Install micromamba (fast conda-compatible manager)
+  - runuser -u $(id -nu 1000) -- sh -c "curl -Ls https://micro.mamba.pm/install.sh | YES=yes bash"

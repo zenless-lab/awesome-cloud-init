@@ -1,0 +1,21 @@
+#cloud-config
+# Minimal configuration to install a C++ development environment.
+# Optimizes package definitions by only branching where names differ between distributions.
+
+# Install core packages and development tools
+packages:
+  - apt: build-essential
+    yum: [gcc-c++, make]
+  - apt: pkg-config
+    yum: pkgconf-pkg-config
+  - clang
+  - lld
+  - lldb
+  - cmake
+  - meson
+  - ninja-build
+  - gdb
+  - valgrind
+  - ccache
+  - git
+  - curl
