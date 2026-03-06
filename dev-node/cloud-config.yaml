@@ -9,40 +9,53 @@ packages:
   - git
   - unzip
 
+write_files:
+  - path: /etc/skel/.bashrc
+    owner: root:root
+    permissions: '0644'
+    append: true
+    content: |
+      # Node Version Manager (NVM) initialization
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+      # Deno and Bun initialization
+      export DENO_INSTALL="$HOME/.deno"
+      export BUN_INSTALL="$HOME/.bun"
+      export PATH="$DENO_INSTALL/bin:$BUN_INSTALL/bin:$PATH"
+
 # Post-installation steps to install package managers and alternative runtimes
 runcmd:
-  # Enable corepack for yarn and pnpm (modern Node.js approach)
-  - runuser -u $(id -nu 1000) -- bash -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash"
+  # Install NVM and the latest LTS version of Node.js, then set it as default
   - |
-    runuser -u $(id -nu 1000) -- bash -c '
-      export NVM_DIR="$HOME/.nvm"
-      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    export NVM_DIR="/etc/skel/.nvm"
+    git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+    cd "$NVM_DIR"
+    git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
+    . "$NVM_DIR/nvm.sh"
+    nvm install --lts
+    nvm use --lts
+  # Enable corepack and prepare yarn and pnpm
+  - |
+    export COREPACK_HOME="/etc/skel/.cache/node/corepack"
+    mkdir -p "$COREPACK_HOME"
 
-      nvm install 22
-      nvm alias default 22
+    corepack enable yarn pnpm
 
-      corepack enable yarn
-      corepack prepare yarn@latest --activate
-
-      corepack enable pnpm
-      corepack prepare pnpm@latest --activate
-
-    '
-
+    corepack prepare yarn@latest --activate
+    corepack prepare pnpm@latest --activate
+  # Copy nvm directory to the primary user's home and set ownership
+  - cp -r /etc/skel/.nvm /home/$(id -nu 1000)/.nvm && chown -R 1000:1000 /home/$(id -nu 1000)/.nvm
   # Install Deno
-  - runuser -u $(id -nu 1000) -- bash -c "curl -fsSL https://deno.land/install.sh | sh"
-
-  # Install Bun
-  - runuser -u $(id -nu 1000) -- bash -c "curl -fsSL https://bun.com/install | bash"
-
-  # Ensure binaries are in the PATH for the primary user
   - |
-    USER_HOME=$(getent passwd 1000 | cut -d: -f6)
-    cat << 'EOF' >> ${USER_HOME}/.bashrc
-
-    # JS Runtimes (Deno & Bun)
-    export DENO_INSTALL="$HOME/.deno"
-    export BUN_INSTALL="$HOME/.bun"
-    export PATH="$DENO_INSTALL/bin:$BUN_INSTALL/bin:$PATH"
-    EOF
-    chown 1000:1000 ${USER_HOME}/.bashrc
+    export DENO_INSTALL="/etc/skel/.deno"
+    curl -fsSL https://deno.land/install.sh | sh
+    cp -r /etc/skel/.deno /home/$(id -nu 1000)/.deno
+    chown -R 1000:1000 /home/$(id -nu 1000)/.deno
+  # Install Bun
+  - |
+    export BUN_INSTALL="/etc/skel/.bun"
+    curl -fsSL https://bun.com/install | bash
+    cp -r /etc/skel/.bun /home/$(id -nu 1000)/.bun
+    chown -R 1000:1000 /home/$(id -nu 1000)/.bun
