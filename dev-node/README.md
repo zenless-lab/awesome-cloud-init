@@ -4,10 +4,10 @@ Installs Node.js (via NVM), package managers, and alternative runtimes for a mod
 
 ## Features
 
-- Installs Node.js `22` with `nvm` for user-level version management.
+- Installs Node.js (current LTS) via `nvm` for user-level version management.
 - Enables and activates `yarn` and `pnpm` with Corepack.
 - Installs `deno` and `bun` for multi-runtime workflows.
-- Appends runtime PATH exports to UID `1000` user's `.bashrc`.
+- Writes runtime PATH exports to `/etc/skel/.bashrc`; the configuration copies runtime files into the primary user's home (UID `1000`) but does not modify that user's existing `.bashrc`.
 
 ## How It Works
 
@@ -21,11 +21,11 @@ Installs Node.js (via NVM), package managers, and alternative runtimes for a mod
 
 `runcmd` performs user-scoped setup for UID `1000`:
 
-- Install NVM (`v0.40.4`).
-- Install and set default Node.js `22`.
-- Enable Corepack and activate latest `yarn` and `pnpm`.
-- Install `deno` and `bun` via official installers.
-- Append `DENO_INSTALL`, `BUN_INSTALL`, and PATH exports to `.bashrc`.
+- Clone `nvm` into `/etc/skel/.nvm` and check out the latest released tag (not a fixed `nvm` version).
+- Install and set the default Node.js to the current LTS using `nvm install --lts` and `nvm use --lts`.
+- Enable Corepack and activate the latest `yarn` and `pnpm`.
+- Install `deno` and `bun` via their upstream install scripts into `/etc/skel` and then copy those runtime directories into the primary user's home, updating ownership to UID `1000`.
+- Write PATH and runtime-related exports to `/etc/skel/.bashrc` so they apply to newly created shells/users; the existing primary user's shell files are not modified by the cloud-init write step.
 
 ## Prerequisites
 
