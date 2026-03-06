@@ -6,8 +6,8 @@ Installs the latest Go release from upstream binaries and configures a user work
 
 - Automatically resolves and installs the latest stable Go version.
 - Idempotent install check for `/usr/local/go`.
-- Creates and owns `GOPATH` directories for UID `1000` user.
-- Persists Go environment variables in that user's `.bashrc`.
+- Creates an idempotent installation for `/usr/local/go`.
+- Ensures the Go binary directory is available system-wide by appending to `/etc/profile`.
 
 ## How It Works
 
@@ -23,13 +23,12 @@ Installs the latest Go release from upstream binaries and configures a user work
 
 - Fetch latest Go version label from `https://go.dev/VERSION?m=text`.
 - Download and extract `go<version>.linux-amd64.tar.gz` into `/usr/local/go`.
-- Create `${HOME}/go/{bin,src,pkg}` for UID `1000`.
-- Append `GOROOT`, `GOPATH`, and PATH exports to that user's `.bashrc` if missing.
+- Add the Go binary directory (`/usr/local/go/bin`) to the system PATH by appending to `/etc/profile` via `write_files` with `append: true`.
 
 ## Prerequisites
 
-- A primary login user with UID `1000`.
 - Outbound HTTPS access to `go.dev`.
+- Root or cloud-init privileges are required to install into `/usr/local` and to append to `/etc/profile`.
 
 ## Network and Security
 

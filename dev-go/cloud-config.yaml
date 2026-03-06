@@ -10,6 +10,17 @@ packages:
   - build-essential # Often needed for cgo or compiling certain tools
 
 # Post-installation setup
+write_files:
+  - path: /etc/profile
+    owner: root:root
+    permissions: '0644'
+    append: true
+    content: |
+      # Go environment
+      if ! echo "$PATH" | /bin/grep -q "/usr/local/go/bin"; then
+        export PATH=$PATH:/usr/local/go/bin
+      fi
+
 runcmd:
   # Install Go (latest stable)
   - |
@@ -23,25 +34,4 @@ runcmd:
       rm -rf /usr/local/go
       tar -C /usr/local -xzf /tmp/go.tar.gz
       rm /tmp/go.tar.gz
-    fi
-
-  # Set up environment variables for the primary user
-  - |
-    USER_NAME=$(id -nu 1000)
-    USER_HOME=$(getent passwd 1000 | cut -d: -f6)
-
-    # Create GOPATH directory
-    mkdir -p ${USER_HOME}/go/bin ${USER_HOME}/go/src ${USER_HOME}/go/pkg
-    chown -R 1000:1000 ${USER_HOME}/go
-
-    # Configure environment in .bashrc if not already present
-    if ! grep -q "GOROOT=/usr/local/go" ${USER_HOME}/.bashrc; then
-      cat << 'EOF' >> ${USER_HOME}/.bashrc
-
-    # Go environment
-    export GOROOT=/usr/local/go
-    export GOPATH=$HOME/go
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-    EOF
-      chown 1000:1000 ${USER_HOME}/.bashrc
     fi
