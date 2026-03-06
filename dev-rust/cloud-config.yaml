@@ -1,4 +1,4 @@
-# cloud-config
+#cloud-config
 # Minimal configuration to install Rust using rustup
 
 # Ensure prerequisites are installed
