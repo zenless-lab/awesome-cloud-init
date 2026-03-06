@@ -55,7 +55,7 @@ multipass launch 24.04 --name gpu-cuda-toolkit --cloud-init cloud-config.yaml
 incus launch images:ubuntu/24.04/cloud gpu-cuda-toolkit --vm --config=user.user-data="$(cat cloud-config.yaml)"
 ```
 
-### LXD (lxc / LDX)
+### LXD (lxc / LXD)
 
 ```bash
 lxc launch images:ubuntu/24.04/cloud gpu-cuda-toolkit --vm --config=user.user-data="$(cat cloud-config.yaml)"
