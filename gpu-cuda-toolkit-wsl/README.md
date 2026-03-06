@@ -49,7 +49,7 @@ Not recommended: this profile is intended for WSL specifically. Use `gpu-cuda-to
 
 Not recommended: this profile is intended for WSL specifically.
 
-### LXD (lxc / LDX)
+### LXD (lxc / LXD)
 
 Not recommended: this profile is intended for WSL specifically.
 
