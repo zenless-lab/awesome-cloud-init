@@ -15,7 +15,7 @@ runcmd:
   - |
     GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
     # Check if latest version is already installed
-    if [[ -d "/usr/local/go" ]] && [[ "$(/usr/local/go/bin/go version 2>/dev/null)" == *"$GO_VERSION"* ]]; then
+    if [ -d "/usr/local/go" ] && /usr/local/go/bin/go version 2>/dev/null | grep -q "$GO_VERSION"; then
       echo "Go $GO_VERSION is already installed."
     else
       echo "Installing Go $GO_VERSION..."
@@ -31,7 +31,7 @@ runcmd:
     USER_HOME=$(getent passwd 1000 | cut -d: -f6)
 
     # Create GOPATH directory
-    mkdir -p ${USER_HOME}/go/{bin,src,pkg}
+    mkdir -p ${USER_HOME}/go/bin ${USER_HOME}/go/src ${USER_HOME}/go/pkg
     chown -R 1000:1000 ${USER_HOME}/go
 
     # Configure environment in .bashrc if not already present
