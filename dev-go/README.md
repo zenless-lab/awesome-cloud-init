@@ -5,9 +5,8 @@ Installs the latest Go release from upstream binaries and configures a user work
 ## Features
 
 - Automatically resolves and installs the latest stable Go version.
-- Idempotent install check for `/usr/local/go`.
-- Creates an idempotent installation for `/usr/local/go`.
-- Ensures the Go binary directory is available system-wide by appending to `/etc/profile`.
+- Idempotent: skips installation if the target version is already present in `/usr/local/go`.
+- Makes `/usr/local/go/bin` available system-wide via `/etc/profile.d/go.sh` (sourced by login shells).
 
 ## How It Works
 
@@ -17,18 +16,21 @@ Installs the latest Go release from upstream binaries and configures a user work
 
 - `curl`, `git`, `ca-certificates`, `build-essential`
 
+### write_files
+
+`write_files` creates `/etc/profile.d/go.sh` which prepends `/usr/local/go/bin` to the PATH for all login shells, ensuring the installed Go takes precedence over any system-packaged version.
+
 ### Key Steps (runcmd)
 
 `runcmd` performs:
 
 - Fetch latest Go version label from `https://go.dev/VERSION?m=text`.
-- Download and extract `go<version>.linux-amd64.tar.gz` into `/usr/local/go`.
-- Add the Go binary directory (`/usr/local/go/bin`) to the system PATH by appending to `/etc/profile` via `write_files` with `append: true`.
+- Download and extract `go<version>.linux-amd64.tar.gz` into `/usr/local/go` (skips if the same version is already installed).
 
 ## Prerequisites
 
 - Outbound HTTPS access to `go.dev`.
-- Root or cloud-init privileges are required to install into `/usr/local` and to append to `/etc/profile`.
+- Root or cloud-init privileges are required to install into `/usr/local` and to write `/etc/profile.d/go.sh`.
 
 ## Network and Security
 
