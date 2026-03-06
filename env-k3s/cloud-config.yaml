@@ -1,0 +1,24 @@
+## template: jinja
+#cloud-config
+# Minimal configuration to install a K3s server (master node).
+# This configuration installs the server and prepares it for operation.
+
+# Install necessary tools
+packages:
+  - curl
+
+# Post-installation steps to install K3s server
+# -------------------------------------------------------------------------
+# HOW TO DEPLOY CHILD (AGENT) NODES:
+# -------------------------------------------------------------------------
+# To join a worker/agent node to this server, use the following command
+# on the agent node:
+#
+# curl -sfL https://get.k3s.io | K3S_URL=https://myserver:6443 K3S_TOKEN=mynodetoken sh -
+#
+# Replace 'myserver' with the actual server IP or hostname.
+# Replace 'mynodetoken' with the token found on the server at:
+#   /var/lib/rancher/k3s/server/node-token
+# -------------------------------------------------------------------------
+runcmd:
+  - curl -sfL https://get.k3s.io | sh -
