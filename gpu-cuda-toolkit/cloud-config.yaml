@@ -21,13 +21,8 @@ yum_repos:
 
 zypper:
   repos:
-    - name: cuda
-      url: "https://developer.download.nvidia.com/compute/cuda/repos/{{ v1.distro | lower }}{{ v1.distro_version | replace('.', '') }}/{{ 'sbsa' if v1.machine == 'aarch64' else 'x86_64' }}/"
-      alias: cuda
-      enabled: true
-      gpgcheck: true
-      # NOTE: The gpgkey URL can be found on NVIDIA's official CUDA repository(https://developer.download.nvidia.com/compute/cuda/repos/<distro>/<arch>/)
-      gpgkey: https://developer.download.nvidia.com/compute/cuda/repos/{{ v1.distro | lower }}{{ v1.distro_version | replace('.', '') }}/{{ 'sbsa' if v1.machine == 'aarch64' else 'x86_64' }}/D42D0685.pub
+    - id: cuda
+      baseurl: "https://developer.download.nvidia.com/compute/cuda/repos/{{ v1.distro | lower }}{{ v1.distro_version | replace('.', '') }}/{{ 'sbsa' if v1.machine == 'aarch64' else 'x86_64' }}/"
 
 # Install the specific CUDA toolkit package
 packages:
