@@ -11,14 +11,13 @@ packages:
 
 # Post-installation setup
 write_files:
-  - path: /etc/profile
+  - path: /etc/profile.d/go.sh
     owner: root:root
     permissions: '0644'
-    append: true
     content: |
       # Go environment
       if ! echo "$PATH" | /bin/grep -q "/usr/local/go/bin"; then
-        export PATH=$PATH:/usr/local/go/bin
+        export PATH="/usr/local/go/bin:$PATH"
       fi
 
 runcmd:
