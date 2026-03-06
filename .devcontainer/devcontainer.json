@@ -1,0 +1,39 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ubuntu",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/base:noble",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"configureZshAsDefaultShell": true
+		},
+		"ghcr.io/devcontainers/features/copilot-cli:1": {},
+		"ghcr.io/devcontainers/features/git-lfs:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers/features/python:1": {
+			"toolsToInstall": "pre-commit"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"redhat.vscode-yaml",
+				"davidanson.vscode-markdownlint",
+				"editorconfig.editorconfig"
+			],
+			"mcp": {
+				"servers": {
+					"io.github.upstash/context7": {
+						"type": "stdio",
+						"command": "npx",
+						"args": [
+							"@upstash/context7-mcp@1.0.31"
+						]
+					}
+				}
+			}
+		}
+	}
+}
