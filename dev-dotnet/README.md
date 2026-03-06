@@ -53,7 +53,7 @@ multipass launch 24.04 --name dev-dotnet --cloud-init cloud-config.yaml
 incus launch images:ubuntu/24.04/cloud dev-dotnet --vm --config=user.user-data="$(cat cloud-config.yaml)"
 ```
 
-### LXD (lxc / LDX)
+### LXD (lxc / LXD)
 
 ```bash
 lxc launch images:ubuntu/24.04/cloud dev-dotnet --vm --config=user.user-data="$(cat cloud-config.yaml)"
