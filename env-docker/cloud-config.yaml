@@ -1,0 +1,25 @@
+## template: jinja
+#cloud-config
+# Minimal configuration to install Docker on Ubuntu using built-in modules
+# Configures the default user with sudo and docker group access.
+
+# Add Docker's official repository and GPG key
+apt:
+  sources:
+    docker:
+      # $RELEASE will be automatically replaced by the OS codename (e.g., jammy, noble)
+      source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ v1.distro_release }} stable"
+      keyid: 0EBFCD88
+
+# Install Docker packages
+packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+# Configure the default user
+user:
+  groups: [sudo, docker]
+  sudo: ALL=(ALL) NOPASSWD:ALL

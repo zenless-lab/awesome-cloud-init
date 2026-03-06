@@ -1,0 +1,13 @@
+## template: jinja
+#cloud-config
+# Minimal configuration to install text editors (nano, vi, vim, emacs, neovim).
+# Configures common command-line editors.
+
+# Install editor packages from standard repositories
+packages:
+  - nano
+  - vim # Provides both 'vi' and 'vim'
+  - emacs-nox # Minimal version without X dependencies for faster cloud-init
+  - neovim
+  - curl
+  - git # Useful for editor plugins/config
