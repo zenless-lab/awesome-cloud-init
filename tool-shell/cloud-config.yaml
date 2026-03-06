@@ -11,6 +11,7 @@ packages:
   - fish
   - curl
   - git
+  - bat
 
 # Configure the default user and its shell
 user:
