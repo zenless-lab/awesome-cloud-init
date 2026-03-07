@@ -1,24 +1,102 @@
 #cloud-config
-# Minimal configuration to install modern Python development tools (uv, miniforge, micromamba).
+# Minimal configuration to install modern Python development tools (uv, mamba, micromamba).
 # Targets compatible Linux distributions. Uses UID 1000 for the primary user.
 
 # Install common dependencies
 packages:
   - curl
   - git
+  - rsync
+
+write_files:
+  - path: /etc/skel/.local/bin/env
+    owner: root:root
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      # Python tooling PATH initialization
+      case ":$PATH:" in
+        *:"$HOME/.local/bin":*)
+          ;;
+        *)
+          export PATH="$HOME/.local/bin:$PATH"
+          ;;
+      esac
+
+  - path: /etc/skel/.bashrc
+    owner: root:root
+    permissions: '0644'
+    append: true
+    content: |
+      # Source the env script to set up PATH for Python tools
+      if [ -f "$HOME/.local/bin/env" ]; then
+        . "$HOME/.local/bin/env"
+      fi
+
 
 # Post-installation steps to install Python package and environment managers
-# Using runuser with UID 1000 to avoid hardcoded username
 runcmd:
-  # Install uv (modern Python package manager)
-  - runuser -u $(id -nu 1000) -- sh -c "curl -LsSf https://astral.sh/uv/install.sh | sh"
-  # Install Miniforge (minimal conda installer)
+  # Install uv into /etc/skel so new users inherit it.
   - |
-    USER_HOME=$(getent passwd 1000 | cut -d: -f6)
-    TEMP_SH="/tmp/Miniforge3-$(uname)-$(uname -m).sh"
-    curl -L "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -o "${TEMP_SH}"
-    runuser -u $(id -nu 1000) -- bash "${TEMP_SH}" -b -p "${USER_HOME}/miniforge3"
-    runuser -u $(id -nu 1000) -- "${USER_HOME}/miniforge3/bin/conda" init
-    rm "${TEMP_SH}"
-  # Install micromamba (fast conda-compatible manager)
-  - runuser -u $(id -nu 1000) -- sh -c "curl -Ls https://micro.mamba.pm/install.sh | YES=yes bash"
+    echo "Installing uv into /etc/skel for new users..."
+    if [ ! -x /etc/skel/.local/bin/uv ]; then
+      export HOME=/etc/skel
+      export UV_INSTALL_DIR=/etc/skel/.local/bin
+      export INSTALLER_NO_MODIFY_PATH=1
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+    fi
+  # Install Miniforge system-wide, then add mamba for all users.
+  - |
+    echo "Installing Miniforge system-wide into /opt/miniforge3..."
+    if [ ! -x /opt/miniforge3/bin/conda ]; then
+      temp_sh="/tmp/Miniforge3-$(uname)-$(uname -m).sh"
+      curl -L "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -o "$temp_sh"
+      bash "$temp_sh" -b -p /opt/miniforge3
+      rm -f "$temp_sh"
+    fi
+
+    if [ ! -x /opt/miniforge3/bin/mamba ]; then
+      /opt/miniforge3/bin/conda install -n base -y mamba
+    fi
+
+    ln -sf /opt/miniforge3/bin/conda /usr/local/bin/conda
+    ln -sf /opt/miniforge3/bin/mamba /usr/local/bin/mamba
+  # Install micromamba into /etc/skel so new users inherit it.
+  - |
+    echo "Installing micromamba into /etc/skel for new users..."
+    if [ ! -x /etc/skel/.local/bin/micromamba ]; then
+      export BIN_FOLDER=/etc/skel/.local/bin
+      export PREFIX_LOCATION=/etc/skel/micromamba
+      export INIT_YES=no
+      export CONDA_FORGE_YES=yes
+      curl -LsSf https://micro.mamba.pm/install.sh | SHELL=/bin/bash sh
+    fi
+  # Copy the /etc/skel tooling into the default UID 1000 user.
+  - |
+    echo "Copying Python tooling from /etc/skel to the default user with UID 1000..."
+    default_entry="$(getent passwd 1000 || true)"
+
+    if [ -z "$default_entry" ]; then
+      echo "No user with UID 1000 found. Skipping user-level Python tooling copy."
+      exit 0
+    fi
+
+    default_user="$(printf '%s\n' "$default_entry" | cut -d: -f1)"
+    default_group_id="$(printf '%s\n' "$default_entry" | cut -d: -f4)"
+    default_home="$(printf '%s\n' "$default_entry" | cut -d: -f6)"
+    default_group="$(getent group "$default_group_id" | cut -d: -f1)"
+
+    safe_rsync() {
+      local src="$1"
+      local dest="$2"
+      mkdir -p "$dest"
+      rsync -a "$src/" "$dest/"
+      chown -R "$default_user:$default_group" "$dest"
+    }
+
+    safe_rsync /etc/skel/.local/ "$default_home/.local/"
+
+    if [ -f /etc/skel/.condarc ]; then
+      cp /etc/skel/.condarc "$default_home/.condarc"
+      chown "$default_user:$default_group" "$default_home/.condarc"
+    fi
