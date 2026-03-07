@@ -8,7 +8,6 @@ Installs a broad set of daily CLI tools, archive utilities, transfer tools, and 
 - Installs monitoring and disk tools including `btop`, `htop`, `nvtop`, and `duf`.
 - Installs build and archive tooling including `build-essential`, `7zip`, `lz4`, `pigz`, `xz-utils`, `zstd`, and `tar`.
 - Installs `zsh`, clones Oh My Zsh directly into `/etc/skel/.oh-my-zsh`, and writes a default-style `/etc/skel/.zshrc` without extra plugins.
-- Installs `zsh`, clones Oh My Zsh directly into `/etc/skel/.oh-my-zsh`, and writes a default-style `/etc/skel/.zshrc` without extra plugins.
 - Sets `/bin/zsh` as the default shell for new users and for the system `useradd`/`adduser` defaults; copies Oh My Zsh into the existing UID 1000 user's home when present, but does not change that user's existing shell.
 
 ## How It Works

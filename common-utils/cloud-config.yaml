@@ -153,6 +153,9 @@ runcmd:
     default_home="$(printf '%s\n' "$default_entry" | cut -d: -f6)"
     default_group="$(getent group "$default_group_id" | cut -d: -f1)"
 
-    cp -a /etc/skel/.oh-my-zsh "$default_home/.oh-my-zsh"
+    mkdir -p "$default_home/.oh-my-zsh"
+    rsync -a /etc/skel/.oh-my-zsh/ "$default_home/.oh-my-zsh/"
     chown -R "$default_user:$default_group" "$default_home/.oh-my-zsh"
-    install -o "$default_user" -g "$default_group" -m 0644 /etc/skel/.zshrc "$default_home/.zshrc"
+    if [ ! -f "$default_home/.zshrc" ]; then
+      install -o "$default_user" -g "$default_group" -m 0644 /etc/skel/.zshrc "$default_home/.zshrc"
+    fi
