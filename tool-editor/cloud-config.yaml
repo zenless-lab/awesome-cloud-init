@@ -1,4 +1,3 @@
-## template: jinja
 #cloud-config
 # Minimal configuration to install text editors (nano, vi, vim, emacs, neovim).
 # Configures common command-line editors.
