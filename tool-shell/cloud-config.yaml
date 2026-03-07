@@ -145,4 +145,3 @@ runcmd:
     git clone https://github.com/zsh-users/zsh-syntax-highlighting.git /etc/skel/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
     cp -r /etc/skel/.oh-my-zsh /home/$(id -nu 1000)/.oh-my-zsh
     chown -R $(id -nu 1000):$(id -ng 1000) /home/$(id -nu 1000)/.oh-my-zsh
-

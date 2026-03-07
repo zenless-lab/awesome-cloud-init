@@ -1,0 +1,161 @@
+#cloud-config
+# Common utility toolkit for Ubuntu-based cloud images.
+# Installs everyday CLI tools, archive utilities, and configures Oh My Zsh
+# for the default UID 1000 user and all users created after provisioning.
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - 7zip
+  - aria2
+  - btop
+  - build-essential
+  - curl
+  - duf
+  - git
+  - git-lfs
+  - htop
+  - jq
+  - lz4
+  - nano
+  - neovim
+  - nvtop
+  - openssh-client
+  - parallel
+  - pigz
+  - rsync
+  - tar
+  - tmux
+  - wget
+  - xz-utils
+  - zsh
+  - zstd
+
+user:
+  shell: /bin/zsh
+
+write_files:
+  - path: /etc/skel/.zshrc
+    owner: root:root
+    permissions: '0644'
+    content: |
+      # Path to your Oh My Zsh installation.
+      export ZSH="$HOME/.oh-my-zsh"
+
+      # Set name of the theme to load.
+      ZSH_THEME="robbyrussell"
+
+      # Uncomment the following line to use case-sensitive completion.
+      # CASE_SENSITIVE="true"
+
+      # Uncomment the following line to use hyphen-insensitive completion.
+      # HYPHEN_INSENSITIVE="true"
+
+      # Uncomment one of the following lines to change the auto-update behavior.
+      # zstyle ':omz:update' mode disabled
+      # zstyle ':omz:update' mode auto
+      # zstyle ':omz:update' mode reminder
+
+      # Uncomment the following line to change how often to auto-update (in days).
+      # zstyle ':omz:update' frequency 13
+
+      # Uncomment the following line if pasting URLs and other text is messed up.
+      # DISABLE_MAGIC_FUNCTIONS="true"
+
+      # Uncomment the following line to disable colors in ls.
+      # DISABLE_LS_COLORS="true"
+
+      # Uncomment the following line to disable auto-setting terminal title.
+      # DISABLE_AUTO_TITLE="true"
+
+      # Uncomment the following line to enable command auto-correction.
+      # ENABLE_CORRECTION="true"
+
+      # Uncomment the following line to display red dots whilst waiting for completion.
+      # COMPLETION_WAITING_DOTS="true"
+
+      # Uncomment the following line if you want to disable marking untracked files
+      # under VCS as dirty. This makes repository status check for large repositories
+      # much, much faster.
+      # DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+      # Uncomment the following line if you want to change the command execution time
+      # stamp shown in the history command output.
+      # HIST_STAMPS="mm/dd/yyyy"
+
+      # Would you like to use another custom folder than $ZSH/custom?
+      # ZSH_CUSTOM=/path/to/new-custom-folder
+
+      # Which plugins would you like to load?
+      # Standard plugins can be found in $ZSH/plugins/
+      # Custom plugins may be added to $ZSH_CUSTOM/plugins/
+      # Add wisely, as too many plugins slow down shell startup.
+      plugins=(git)
+
+      source $ZSH/oh-my-zsh.sh
+
+      # User configuration
+
+      # export MANPATH="/usr/local/man:$MANPATH"
+
+      # You may need to manually set your language environment.
+      # export LANG=en_US.UTF-8
+
+      # Preferred editor for local and remote sessions.
+      # if [[ -n $SSH_CONNECTION ]]; then
+      #   export EDITOR='vim'
+      # else
+      #   export EDITOR='nvim'
+      # fi
+
+      # Compilation flags.
+      # export ARCHFLAGS="-arch $(uname -m)"
+
+      # Set personal aliases, overriding those provided by Oh My Zsh libs,
+      # plugins, and themes.
+
+runcmd:
+  - git lfs install --system --skip-repo
+  - |
+    set -eu
+
+    skel_dir=/etc/skel
+    skel_ohmyzsh="$skel_dir/.oh-my-zsh"
+
+    if [ ! -d "$skel_ohmyzsh/.git" ]; then
+      rm -rf "$skel_ohmyzsh"
+      git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$skel_ohmyzsh"
+    fi
+
+    chown -R root:root "$skel_ohmyzsh" /etc/skel/.zshrc
+  - |
+    set -eu
+
+    useradd -D -s /bin/zsh
+    if grep -q '^DSHELL=' /etc/adduser.conf; then
+      sed -i 's|^DSHELL=.*|DSHELL=/bin/zsh|' /etc/adduser.conf
+    else
+      printf '\nDSHELL=/bin/zsh\n' >> /etc/adduser.conf
+    fi
+  - |
+    set -eu
+
+    default_entry="$(getent passwd 1000 || true)"
+
+    if [ -z "$default_entry" ]; then
+      echo "No user with UID 1000 found. Skipping Oh My Zsh setup for default user."
+      exit 0
+    fi
+
+    default_user="$(printf '%s\n' "$default_entry" | cut -d: -f1)"
+    default_group_id="$(printf '%s\n' "$default_entry" | cut -d: -f4)"
+    default_home="$(printf '%s\n' "$default_entry" | cut -d: -f6)"
+    default_group="$(getent group "$default_group_id" | cut -d: -f1)"
+
+    mkdir -p "$default_home/.oh-my-zsh"
+    rsync -a /etc/skel/.oh-my-zsh/ "$default_home/.oh-my-zsh/"
+    chown -R "$default_user:$default_group" "$default_home/.oh-my-zsh"
+    if [ ! -f "$default_home/.zshrc" ]; then
+      install -o "$default_user" -g "$default_group" -m 0644 /etc/skel/.zshrc "$default_home/.zshrc"
+    fi
