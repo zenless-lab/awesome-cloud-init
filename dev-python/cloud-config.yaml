@@ -86,15 +86,9 @@ runcmd:
     default_home="$(printf '%s\n' "$default_entry" | cut -d: -f6)"
     default_group="$(getent group "$default_group_id" | cut -d: -f1)"
 
-    safe_rsync() {
-      local src="$1"
-      local dest="$2"
-      mkdir -p "$dest"
-      rsync -a "$src/" "$dest/"
-      chown -R "$default_user:$default_group" "$dest"
-    }
-
-    safe_rsync /etc/skel/.local/ "$default_home/.local/"
+    mkdir -p "$default_home/.local/bin"
+    rsync -a /etc/skel/.local/bin/ "$default_home/.local/bin/"
+    chown -R "$default_user:$default_group" "$default_home/.local/bin"
 
     if [ -f /etc/skel/.condarc ]; then
       cp /etc/skel/.condarc "$default_home/.condarc"
